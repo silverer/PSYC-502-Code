@@ -28,7 +28,7 @@ cumul.binom.atleast <- function(n.trials, p.success,
                                 n.successes){
   probs = rep(0, length(n.successes))
   k = 1
-  for(i in n.successes){
+  for(i in n.successes:n.trials){
     temp1 = factorial(n.trials)/(factorial(i)*factorial(n.trials-i))
     temp2 = p.success^i
     temp3 = (1-p.success)^(n.trials-i)
@@ -49,6 +49,19 @@ binom.stats <- function(n.trials, p.success, stat.type = 'std dev'){
   }
   
 }
+
+mad.outliers <- function(x, filter.outliers = FALSE){
+  med.x = median(x)
+  mad.x = mad(x)
+  mad.scores = abs(x-med.x)/mad.x
+  if(filter.outliers){
+    return(x[mad.scores>2.24])
+  }else{
+    return(mad.scores)
+  }
+}
+test = mad.outliers(c(2,2,3,3,3,4,4,4,10000,10000))
+
 #Similar to psych::describe
 matrix.stats <- function(nums, 
                           multiplier = 1){
