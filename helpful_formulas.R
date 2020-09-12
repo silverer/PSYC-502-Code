@@ -108,4 +108,36 @@ variance <- function(nums){
 std.dev <- function(nums){
   return(sqrt(variance(nums)))
 }
+#NOTE to do inverse of normdist.area, simply call qnorm(p, mean, sd)
+normdist.area <- function(val, m, sd, direction = 'above'){
+  if(direction=='above'){
+    return(1-pnorm(val, m, sd))
+  }else{
+    return(pnorm(val, m, sd))
+  }
+}
+
+normdist.area.between <- function(min.val, max.val, m, sd){
+  area.below.min = normdist.area(min.val, m, sd, direction = 'below')
+  area.below.max = normdist.area(max.val, m, sd, direction = 'below')
+  return(area.below.max-area.below.min)
+}
+#middle.prop is the chunk that you want from the middle
+#assumes you're pulling from middle of distribution and distribution is symmetric
+inverse.normdist.between <- function(middle.prop, m, sd){
+  tail.area <- (1-middle.prop)/2 #calculate area of each tail
+  bottom.lim <- qnorm(tail.area, m, sd)
+  upper.lim <- qnorm(1-tail.area, m, sd)
+  return(c(bottom.lim, upper.lim))
+}
+
+get.zscore <- function(val, m, sd){
+  return((val-m)/sd)
+}
+
+
+
+
+
+
 
