@@ -1,5 +1,7 @@
+#Sets working directory to file location
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 
+#Formulas that are useful for homework
 source('helpful_formulas.R')
 
 #1.	If scores are normally distributed with a mean of 35 and a standard deviation of 10, what percent of the scores is: 
