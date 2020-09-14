@@ -23,9 +23,8 @@ m <- 0
 sd <- 1
 #multiply by 8 and add 75
 new.m <- m * 8 + 75
-variance <- sd^2
-new.variance <- variance * 8
-new.sd <- sqrt(new.variance)
+
+new.sd <- 1 * 8
 
 #Q4--standard normal dist
 m <- 0
