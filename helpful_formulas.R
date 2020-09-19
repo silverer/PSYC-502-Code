@@ -144,9 +144,88 @@ get.zscore <- function(val, m, sd){
   return((val-m)/sd)
 }
 
+# v=c(2,  3, 5, 6, 9) 
+# x=matrix(v,5,1) 
+# m = mean(x) 
+# s_sq = var(x) 
+# N = length(x) 
+# sem=sqrt(s_sq/N) 
+# df=N-1 t=qt(.975,df) 
+# LL=m-t*sem 
+# UL = m+t*sem LL UL
+confint.mean <- function(nums, conf.lev = 0.975){
+  x = nums[!is.na(nums)] #Exclude NA values
+  m = mean(x) 
+  s_sq = var(x)
+  N = length(x)
+  sem = sqrt(s_sq/N) #Estimate of std error of the mean
+  df = N - 1
+  t = qt(conf.lev, df) #Get t-stat
+  LL = m - t * sem
+  UL = m + t * sem
+  return(c(LL, UL))
+  
+}
 
+confint.mean.diff <- function(group.1, group.2){
+  g1 <- group.1[!is.na(group.1)]
+  g2 <- group.2[!is.na(group.2)]
+  MSE = (var(g1)+var(g2))/2 #Mean square error--estimate of population variance from samples
+  n = length(g1) 
+  df = 2*(n-1) 
+  varDiff = 2*MSE/n 
+  seDiff = sqrt(varDiff) 
+  t = qt(.975,df) 
+  m1 = mean(g1) 
+  m2 = mean(g2) 
+  d = m1-m2 
+  LL = d-t*seDiff 
+  UL = d+t*seDiff
+  return(c(LL, UL))
+}
 
+#Every test score can be thought of as the sum of two independent components, 
+#the true score (number of items that respondent knows the answer to) 
+#and the error score (number of items that respondent guesses). 
+#This can be written as:
+test.score <- function(true.score, error.score){
+  return(true.score+error.score)
+}
 
+test.variance <- function(true.score, error.score, is.variance = FALSE){
+  if(is.variance){
+    return(true.score+error.score)
+  }
+  return(var(true.score)+var(error.score))
+}
+
+#The reliability of a test, r.test.test, is the ratio of true-score variance to 
+#test-score variance. 
+#This can be written as:
+reliability.test <- function(true.scores, error.scores, is.variance=FALSE){
+  if(is.variance){
+    return(true.scores/(true.scores+error.scores))
+  }
+  var.true = var(true.scores)
+  var.error = var(error.scores)
+  return(var.true/(var.true+var.error))
+  
+}
+
+test.std.err <- function(true.scores, error.scores){
+  rel.test = reliability.test(true.scores, error.scores)
+  test.score.sd = sqrt(test.variance(true.scores, error.scores))
+  return(test.score.sd*sqrt(1-rel.test))
+}
+
+rel.increase <- function(new.item.length, old.item.length, old.rel){
+  fac.inc = new.item.length/old.item.length
+  return((fac.inc*old.rel)/(1+(fac.inc-1)*old.rel))
+}
+
+max.predictive.validity <-function(reliability){
+  return(sqrt(reliability))
+}
 
 
 
