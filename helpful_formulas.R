@@ -184,6 +184,10 @@ confint.mean.diff <- function(group.1, group.2){
   return(c(LL, UL))
 }
 
+stderr.mean <- function(sd, n){
+  return(sd/sqrt(n))
+}
+
 #Every test score can be thought of as the sum of two independent components, 
 #the true score (number of items that respondent knows the answer to) 
 #and the error score (number of items that respondent guesses). 
@@ -225,6 +229,18 @@ rel.increase <- function(new.item.length, old.item.length, old.rel){
 
 max.predictive.validity <-function(reliability){
   return(sqrt(reliability))
+}
+
+std.err.meandiff <- function(var1, var2, n1, n2){
+  return(sqrt((var1/n1)+(var2/n2)))
+}
+
+r.to.zprime <- function(r){
+  return(0.5*log((1+r)/(1-r)))
+}
+
+r.std.err <- function(n){
+  return(1/(sqrt(n -3)))
 }
 
 
