@@ -144,15 +144,7 @@ get.zscore <- function(val, m, sd){
   return((val-m)/sd)
 }
 
-# v=c(2,  3, 5, 6, 9) 
-# x=matrix(v,5,1) 
-# m = mean(x) 
-# s_sq = var(x) 
-# N = length(x) 
-# sem=sqrt(s_sq/N) 
-# df=N-1 t=qt(.975,df) 
-# LL=m-t*sem 
-# UL = m+t*sem LL UL
+
 confint.mean <- function(nums, conf.lev = 0.975){
   x = nums[!is.na(nums)] #Exclude NA values
   m = mean(x) 
@@ -167,20 +159,34 @@ confint.mean <- function(nums, conf.lev = 0.975){
   
 }
 
+#group.sizes is a vector that specifies how large each group is
+#For example, if you're comparing 2 groups, 
+#and length(group1) = 32, length(group2) = 35
+#Pass this function c(length(group1), length(group2)) or c(32, 35)
+harmonic.mean <- function(group.sizes){
+  numerator = length(group.sizes)
+  denoms = 1/group.sizes
+  return(numerator/sum(denoms))
+}
+
+
 confint.mean.diff <- function(group.1, group.2){
-  g1 <- group.1[!is.na(group.1)]
-  g2 <- group.2[!is.na(group.2)]
-  MSE = (var(g1)+var(g2))/2 #Mean square error--estimate of population variance from samples
-  n = length(g1) 
-  df = 2*(n-1) 
-  varDiff = 2*MSE/n 
-  seDiff = sqrt(varDiff) 
-  t = qt(.975,df) 
-  m1 = mean(g1) 
-  m2 = mean(g2) 
-  d = m1-m2 
-  LL = d-t*seDiff 
-  UL = d+t*seDiff
+  g1 = group.1[!is.na(group.1)]
+  g2 = group.2[!is.na(group.2)]
+  df = (length(g1) - 1) + (length(g2) - 1)
+  t.stat = qt(.975,df)
+  if(length(g1)!=length(g2)){
+    sse = sum((g1-mean(g1))^2) + sum((g2-mean(g2))^2)
+    MSE = sse/df
+    harm.mean = harmonic.mean(c(length(g1), length(g2)))
+    seDiff = sqrt(((2*MSE)/harm.mean)) #Std err of the mean difference
+  }else{
+    MSE = (var(g1)+var(g2))/2 #Mean square error--estimate of population variance from samples
+    seDiff = sqrt((2*MSE)/length(g1))
+  }
+  d = mean(g1)-mean(g2) 
+  LL = d-t.stat*seDiff 
+  UL = d+t.stat*seDiff
   return(c(LL, UL))
 }
 
@@ -242,6 +248,4 @@ r.to.zprime <- function(r){
 r.std.err <- function(n){
   return(1/(sqrt(n -3)))
 }
-
-
 
