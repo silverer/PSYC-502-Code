@@ -1,0 +1,154 @@
+---
+title: "PSYC 502 HW10 - R Matrices"
+author: "Elisabeth R Silver"
+date: "10/2/2020"
+output: html_document
+---
+
+```{r setup}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+## 1. Initialization
+
+```{r m1, include = TRUE}
+m1 <- rbind(c(6, 4, 24),
+            c(1, -9, 8))
+#Result
+m1
+```
+
+## 2. Addition
+
+```{r m.add,include = TRUE}
+m.add.1 <- rbind(c(3, 8),
+                 c(4, 6))
+m.add.1
+m.add.2 <- rbind(c(4, 0),
+                 c(1, -9))
+m.add.2
+#Result
+m.add.1 + m.add.2
+
+```
+
+## 3. Negative
+
+```{r m.negative,include = TRUE}
+mat <- rbind(c(2, -4),
+             c(7, 10))
+mat
+#Result
+-1*mat
+
+```
+
+## 4. Subtraction
+
+```{r m.subtract,include = TRUE}
+m.sub.1 <- rbind(c(3, 8),
+                 c(4, 6))
+m.sub.1
+m.sub.2 <- rbind(c(4, 0),
+                 c(1, -9))
+m.sub.2
+#Result
+m.sub.1 - m.sub.2
+```
+
+## 5. Multiplication by a constant
+
+```{r m.mult.constant,include = TRUE}
+mat <- rbind(c(4, 0),
+             c(1, -9))
+mat
+#Result
+2*mat
+
+```
+
+## 6. Transpose
+
+```{r m.transpose,include = TRUE}
+mat <- rbind(c(6, 4, 24),
+             c(1, -9, 8))
+mat
+#Result
+t(mat)
+
+```
+
+# Multiplication
+
+NOTE: To multiply an m x n matrix by an n x p matrix, the n's must be the same and the result will be an m x p matrix
+
+## 1. Multiplying a matrix by another matrix
+
+```{r m.mult,include = TRUE}
+mat <- rbind(c(1, 2, 3),
+             c(4, 5, 6))
+mat
+
+mat1 <- rbind(c(7, 8),
+              c(9, 10),
+              c(11, 12))
+mat1
+
+#Result
+mat %*% mat1
+
+
+
+```
+
+## 2. Getting the sales of pies
+
+```{r m.pies,include = TRUE}
+mat <- c(3, 4, 2)
+mat
+
+mat1 <- rbind(c(13, 9, 7, 15),
+              c(8, 7, 4, 6),
+              c(6, 4, 0, 3))
+mat1
+
+#Result
+mat %*% mat1
+
+```
+
+## 3. Rows and columns
+
+The number of columns of the 1st matrix must equal the number of rows of the 2nd matrix. And the result will have the same number of rows as the 1st matrix, and the same number of columns as the 2nd matrix.
+
+```{r m.rows.columns,include = TRUE}
+mat <- matrix(c(1,2,3), nrow=1, ncol=3)
+mat1 <- matrix(c(4,5,6), nrow=3, ncol=1)
+#Result
+mat%*%mat1
+
+mat <- matrix(c(1,2,3), nrow=1, ncol=3)
+mat1 <- matrix(c(4,5,6), nrow=3, ncol=1)
+#Result
+mat1%*%mat
+
+```
+
+## 4. Order of multiplication
+
+When the order of matrix multiplication changes, it usually leads to different results (i.e. A\*B != B\*A)
+
+```{r m.order,include = TRUE}
+mat <- rbind(c(1, 2),
+             c(3, 4))
+mat1 <- rbind(c(2, 0),
+             c(1, 2))
+#Result
+mat%*%mat1
+
+mat1%*%mat
+
+```
+
+

@@ -109,6 +109,7 @@ MSE <- mean(variances)
 #Create contrast matrix
 
 #Get the SE of the contrast but adjusted for linear contrast coefficients
+#Sum of squares of coefficients = g^2
 seL <- sqrt(sum(g.contrast*g.contrast*MSE/n))
 t.stat <- qt(.975,df) #assuming 95% CI
 
@@ -128,5 +129,11 @@ LL
 
 #Upper CI:
 UL
-
+#Test statistic = statistic/std err of statistic
+t.stat.test <- L/seL
+#Find the area of the distribution above the t-statistic and multiply by 2 to get both tails
+p.val <- 2*pt(abs(t.stat.test),df,
+     lower.tail=FALSE)
+t.stat.test
+p.val
 
