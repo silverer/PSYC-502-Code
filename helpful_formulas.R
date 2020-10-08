@@ -1,4 +1,4 @@
-
+library(psych)
 #Nums: vector containing observed values
 geom.mean <- function(nums){
   product = prod(nums)
@@ -36,6 +36,31 @@ cumul.binom.atleast <- function(n.trials, p.success,
     k = 1 + k
   }
   return(sum(probs))
+}
+#max.n.trials is the maximum trials performed 
+#e.g., if you're taking a 12-question test w/performance = 80%
+#and want to know how many you'd need to get right to do *sig* better than chance,
+#you'd do: 0.5, 12, 0.8
+min.better.than.binom <- function(target.percent, max.n.trials, percent.success){
+  i = 1
+  #Iterate over trials until you get the minimum trials necessary to reach percent.success
+  #That is, the min trials required to have a 95% lower CI that is greater than the minimum successes required
+  #If testiing # of trials to do better than chance, target.percent == 0.5
+  while(i<max.n.trials){
+    tmp.r = binom.test(i, max.n.trials, percent.success, 
+                       alternative='greater')
+    if(tmp.r$conf.int[1]<target.percent){
+      i = i + 1
+    }else{
+      return(i)
+    }
+  }
+}
+#Gives you the probability of performing better than a specific % given 
+#a set of trial opportunities and likelihood of success on each trial
+prob.min.better.than.binom <- function(target.percent, max.n.trials, percent.success){
+  test.val = min.better.than.binom(target.percent, max.n.trials,percent.success)
+  return(cumul.binom.atleast(max.n.trials, percent.success, test.val))
 }
 
 #Returns either mean, standard deviation, or variance (stat.type)
@@ -194,6 +219,27 @@ stderr.mean <- function(sd, n){
   return(sd/sqrt(n))
 }
 
+tval.mean.diff <- function(g1, g2){
+  mdiff = g1-g2
+  mse = (var(g1)+var(g2))/2
+  #Get the standard error of the mean difference
+  seM = sqrt((2*mse)/length(g1))
+  df = 2*(length(g1)-1)
+  #Get t-value for test statistic
+  test.stat = mdiff/seM
+  
+  
+  return(test.stat)
+}
+
+pval.mean.diff <- function(g1, g2){
+  test.stat = tval.mean.diff(g1,g2)
+  df = 2*(length(g1)-1)
+  p.val = 2*pt(abs(test.stat),df,
+               lower.tail=FALSE)
+  return(p.val)
+}
+
 #Every test score can be thought of as the sum of two independent components, 
 #the true score (number of items that respondent knows the answer to) 
 #and the error score (number of items that respondent guesses). 
@@ -247,5 +293,15 @@ r.to.zprime <- function(r){
 
 r.std.err <- function(n){
   return(1/(sqrt(n -3)))
+}
+
+confint.rcorr <- function(r, n){
+  z.prime = r.to.zprime(r)
+  z.se = r.std.err(n)
+  ll = z.prime - (1.96*z.se)
+  ul = z.prime + (1.96*z.se)
+  ll = fisherz2r(ll)
+  ul = fisherz2r(ul)
+  return(c(ll, ul))
 }
 
