@@ -163,12 +163,24 @@ inverse.normdist.between <- function(middle.prop, m, sd){
   return(c(bottom.lim, upper.lim))
 }
 
+
+
 #Calculates a z-score for a value given the 
 #mean and standard deviation
 get.zscore <- function(val, m, sd){
   return((val-m)/sd)
 }
 
+get.area.zscore <- function(val, m, sd, area = 'below'){
+  z = get.zscore(val, m, sd)
+  if(area == 'below'){
+    return(pnorm(z))
+  }else if(area == 'above'){
+    return(1-pnorm(z))
+  }else{
+    return(pnorm(z)*2)
+  }
+}
 
 confint.mean <- function(nums, conf.lev = 0.975){
   x = nums[!is.na(nums)] #Exclude NA values
@@ -194,6 +206,9 @@ harmonic.mean <- function(group.sizes){
   return(numerator/sum(denoms))
 }
 
+std.err.meandiff <- function(var1, var2, n1, n2){
+  return(sqrt((var1/n1)+(var2/n2)))
+}
 
 confint.mean.diff <- function(group.1, group.2){
   g1 = group.1[!is.na(group.1)]
@@ -240,6 +255,8 @@ pval.mean.diff <- function(g1, g2){
   return(p.val)
 }
 
+#### Correlations and test reliability ####
+
 #Every test score can be thought of as the sum of two independent components, 
 #the true score (number of items that respondent knows the answer to) 
 #and the error score (number of items that respondent guesses). 
@@ -283,9 +300,6 @@ max.predictive.validity <-function(reliability){
   return(sqrt(reliability))
 }
 
-std.err.meandiff <- function(var1, var2, n1, n2){
-  return(sqrt((var1/n1)+(var2/n2)))
-}
 
 r.to.zprime <- function(r){
   return(0.5*log((1+r)/(1-r)))
@@ -303,5 +317,50 @@ confint.rcorr <- function(r, n){
   ll = fisherz2r(ll)
   ul = fisherz2r(ul)
   return(c(ll, ul))
+}
+
+#### Power ####
+
+#Gives the critical value on a distribution for a given alpha
+#E.g., two-tailed 95% conf level = 1.96
+lookup.critical.value <- function(prob, tails = 'two'){
+  if(tails == 'two'){
+    arg = 1 - prob
+    return(qnorm(1-arg/2))
+  }else if (tails=='lower'){
+    return(qnorm(1-p))
+  }else{
+    return(qnorm(p))
+  }
+}
+
+get.rejection.regions <- function(var1, var2, n1, n2, conf.level = 0.95){
+  se = std.err.meandiff(var1, var2, n1, n2)
+  return(inverse.normdist.between(conf.level, 0, se))
+}
+
+get.prob.rejection <- function(var1, var2, n1, n2, h.diff,
+                               conf.lev = 0.95, direction = 'below'){
+  #Z = (-3.33 - (-3))/1.7 = -0.2, AUC for Z = -0.2 is 0.42
+  se = std.err.meandiff(var1, var2, n1, n2)
+  rej.regions = get.rejection.regions(var1, var2, n1, n2, conf.level=conf.lev)
+  z = (rej.regions - h.diff)/se
+  return(get.area.zscore(rej.regions[1], h.diff, se))
+}
+
+get.se.diff <- function(desired.power, conf.level,
+                        tails = 'two'){
+  crit.val = lookup.critical.value(conf.level, tails = tails)
+  z.score = qnorm(desired.power)
+  return(crit.val+z.score)
+}
+
+get.power.sample.size <- function(var1, var2, h.diff,
+                                  power.lev = 0.9, conf.lev = 0.95,
+                                  tails = 'two'){
+  distribution.distance = get.se.diff(power.lev, conf.lev, tails = tails)
+  #N = (2.8^2)/(3^2) * (144 + 144) = 250.88
+  req.n = (distribution.distance^2)/(h.diff^2) * (var1+var2)
+  return(req.n)
 }
 

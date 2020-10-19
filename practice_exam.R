@@ -7,7 +7,16 @@ a2 <- c(4,4,5,5,6)
 a3 <- c(8,8,6,8,9)
 b1 <- c(4,7,9,8,9)
 b2 <- c(8,5,8,6,6)
+all.dat <- c(a1,a2,a3,b1,b2)
+all.dat.gr <- c(rep('a1', 5), rep('a2', 5), rep('a3', 5),
+                rep('b1', 5), rep('b2', 5))
+dat <- data.frame(all.dat, all.dat.gr)
+dat$all.dat.gr <- as.factor(dat$all.dat.gr)
 
+dat$test.contr <- dat$all.dat.gr
+contrasts(dat$test.contr) <- c()
+
+#dat <- data.frame(a1,a2,a3,b1,b2)
 g.contrast <- c(1/3, 1/3,1/3,-0.5,-0.5)
 
 n <- length(a1)
@@ -43,7 +52,6 @@ p.val <- 2*pt(abs(t.stat.test),df,
               lower.tail=FALSE)
 t.stat.test
 p.val
-
 
 # g1 <- c(3,4,5,6,4)
 # g2 <- c(4,5,7,6,8)

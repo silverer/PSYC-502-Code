@@ -36,6 +36,7 @@ df <- nrow(X)-1
 w <- c(-5, -3, -1, 1, 3, 5)
 #Get the variance of the contrast
 #Pre and post multiplying
+
 varL <- t(w) %*% C %*% w
 #Same result as multiplying X by w
 varL <- var(X%*%w)

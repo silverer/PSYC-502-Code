@@ -3,3 +3,5 @@ src/.DS_Store
 data/.DS_Store
 src/.RData
 src/.RHistory
+src/midterm.R
+
