@@ -1,7 +1,8 @@
 
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 source('helpful_formulas.R')
-
+library(stats)
+library(psych)
 
 #Question 18--find 95% and 90% CIs
 vals <- c(2, 1.5, 3, 2, 3.5, 1, 0.5, 3, 2, 4)
@@ -136,4 +137,24 @@ p.val <- 2*pt(abs(t.stat.test),df,
      lower.tail=FALSE)
 t.stat.test
 p.val
+
+df <- data.frame(c(g1,g2,g3,g4))
+
+df['group'] <- c(rep('g1', 34),rep('g2',34),
+                 rep('g3', 34), rep('g4', 34))
+colnames(df)<-c('score', 'group')
+#library(foreign)
+#write.csv(df, 'hw_8_data.csv')
+#df <- read.csv('hw_8_data.csv')
+library(multcomp)
+df['group'] <- as.factor(df$group)
+
+mod <- lm(score~group, data=df)
+modSummary <- summary(mod)
+modSummary
+K <- c(1/3,1/3,1/3,-1)
+modPlanned <- glht(mod, linfct = mcp(group = K))
+summary(modPlanned)
+
+
 

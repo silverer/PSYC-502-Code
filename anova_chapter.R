@@ -15,8 +15,31 @@ mse <- mean(var(s1$leniency),var(s2$leniency),
             var(s3$leniency),var(s4$leniency))
 
 df <- read.csv('data/aov_ch_11.csv')
-summary(aov(df$q4_vals~df$q4_groups))
-summary(aov(df$q5_vals~df$q5_groups))
+tmp <- df %>% dplyr::filter(is.na(q4_vals)==FALSE)
+
+means <- tmp %>% 
+  group_by(q4_groups) %>% 
+  summarise(means = mean(q4_vals), variances = var(q4_vals),
+            n = n())
+means <- as.data.frame(means)
+#MSE = means of variances
+mse <- mean(means$variances)
+mse
+msb <- means$n[1] * var(means$means)
+msb
+
+dfn <- nrow(means)-1
+dfn
+dfd <- nrow(tmp)-nrow(means)
+dfd
+gm <- mean(tmp$q4_vals)
+
+ssq_error <- dfd*mse
+ssq_error
+ssq_cond <- dfn * msb
+ssq_cond
+summary(aov(tmp$q4_vals~tmp$q4_groups))
+summary(aov(tmp$q5_vals~tmp$q5_groups))
 
 means <- c(4.5,
 7.2,
