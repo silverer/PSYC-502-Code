@@ -1,4 +1,7 @@
 library(psych)
+library(dplyr)
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+
 #Nums: vector containing observed values
 geom.mean <- function(nums){
   product = prod(nums)
@@ -362,5 +365,58 @@ get.power.sample.size <- function(var1, var2, h.diff,
   #N = (2.8^2)/(3^2) * (144 + 144) = 250.88
   req.n = (distribution.distance^2)/(h.diff^2) * (var1+var2)
   return(req.n)
+}
+
+COEFFS.TREND <- read.csv("data/trend_coeffs.csv")
+COEFFS.TREND <- COEFFS.TREND %>% 
+  mutate(trend.type = as.factor(trend.type),
+         trend.type = recode_factor(trend.type, 
+                                    Lin='linear',
+                                    Quad = 'quadratic',
+                                    Cubic = 'cubic'))
+standard_error <- function(x) sd(x) / sqrt(length(x))
+
+test.trend <- function(df, cols, contrast.type = 'linear',
+                       id.col = 'id'){
+  temp = df %>% 
+    dplyr::select((all_of(cols)))
+  num.points = ncol(temp)
+  contrast.mat = COEFFS.TREND %>% 
+    dplyr::filter(n.means == num.points & trend.type==contrast.type) %>% 
+    dplyr::select(-c(trend.type, n.means))
+  #Define matrix of data to which contrast will be applied
+  X = as.matrix(temp)
+  #Define contrast weights
+  w = as.matrix(as.numeric(contrast.mat[,1:num.points]))
+  multiplier = as.vector(w)
+  df['L'] = NA
+  new_cols = list()
+  for(i in 1:length(cols)){
+    new_col = paste0(cols[i],'_L')
+    df[new_col] = multiplier[[i]] * df[cols[i]]
+    new_cols[i] = new_col
+  }
+  temp_1 = df %>% dplyr::select(all_of(unlist(new_cols)))
+  df['L'] = rowSums(temp_1)
+  subj.means = as.data.frame(df %>% 
+    group_by(.data[[id.col]]) %>% 
+    dplyr::summarise(subject_mean = mean(L)))
+  
+  N = nrow(X)
+  L = t(colMeans(X)) %*% w
+  s_sq = t(w) %*% cov(X) %*% w
+  sem = sqrt(s_sq/N)
+  dof = nrow(X)-1
+  t.stat = L/sem
+  p.val = 2*pt(abs(t.stat), dof, lower.tail = FALSE)
+  stat.list = list()
+  stat.list[['L']] = L
+  stat.list[['t.stat']] = t.stat
+  stat.list[['dof']] = dof
+  stat.list[['p.val']] = p.val
+  stat.list[['seL']] = sem
+  stat.list[['contr.weights']] = w
+  stat.list[['subj.means']] = as.data.frame(subj.means)
+  stat.list
 }
 
