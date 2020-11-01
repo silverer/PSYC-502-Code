@@ -376,11 +376,16 @@ COEFFS.TREND <- COEFFS.TREND %>%
                                     Cubic = 'cubic'))
 standard_error <- function(x) sd(x) / sqrt(length(x))
 
+#Test for linear, quadratic, or cubic components of trend
+#df is the dataframe with within-subj data
+#cols is a vector of timepoint columns in string format (e.g., 'Time1','Time2', etc.)
+#contrast.type
 test.trend <- function(df, cols, contrast.type = 'linear',
-                       id.col = 'id'){
+                       id.col = 'id', return.contr.means = FALSE){
   temp = df %>% 
     dplyr::select((all_of(cols)))
   num.points = ncol(temp)
+  #Choose which elements of coefficients dataframe to keep
   contrast.mat = COEFFS.TREND %>% 
     dplyr::filter(n.means == num.points & trend.type==contrast.type) %>% 
     dplyr::select(-c(trend.type, n.means))
@@ -388,19 +393,31 @@ test.trend <- function(df, cols, contrast.type = 'linear',
   X = as.matrix(temp)
   #Define contrast weights
   w = as.matrix(as.numeric(contrast.mat[,1:num.points]))
-  multiplier = as.vector(w)
-  df['L'] = NA
-  new_cols = list()
-  for(i in 1:length(cols)){
-    new_col = paste0(cols[i],'_L')
-    df[new_col] = multiplier[[i]] * df[cols[i]]
-    new_cols[i] = new_col
+  #This list stores the result of the contrast
+  stat.list = list()
+  #If contr.means == TRUE, then compute subject-wise means
+  if(return.contr.means){
+    multiplier = as.vector(w)
+    #Make sure that the id column is present and if not, add it here
+    if(id.col %in% colnames(df)==FALSE){
+      df['id'] = factor(1:nrow(df))
+      id.col = 'id'
+    }
+    df['L'] = NA
+    new_cols = list()
+    for(i in 1:length(cols)){
+      new_col = paste0(cols[i],'_L')
+      df[new_col] = multiplier[[i]] * df[cols[i]]
+      new_cols[i] = new_col
+    }
+    temp_1 = df %>% dplyr::select(all_of(unlist(new_cols)))
+    df['L'] = rowSums(temp_1)
+    subj.means = as.data.frame(df %>% 
+                                 group_by(.data[[id.col]]) %>% 
+                                 dplyr::summarise(subject_mean = mean(L)))
+    stat.list[['subj.means']] = as.data.frame(subj.means)
   }
-  temp_1 = df %>% dplyr::select(all_of(unlist(new_cols)))
-  df['L'] = rowSums(temp_1)
-  subj.means = as.data.frame(df %>% 
-    group_by(.data[[id.col]]) %>% 
-    dplyr::summarise(subject_mean = mean(L)))
+  
   
   N = nrow(X)
   L = t(colMeans(X)) %*% w
@@ -409,14 +426,14 @@ test.trend <- function(df, cols, contrast.type = 'linear',
   dof = nrow(X)-1
   t.stat = L/sem
   p.val = 2*pt(abs(t.stat), dof, lower.tail = FALSE)
-  stat.list = list()
+  
   stat.list[['L']] = L
   stat.list[['t.stat']] = t.stat
   stat.list[['dof']] = dof
   stat.list[['p.val']] = p.val
   stat.list[['seL']] = sem
   stat.list[['contr.weights']] = w
-  stat.list[['subj.means']] = as.data.frame(subj.means)
+  
   stat.list
 }
 
