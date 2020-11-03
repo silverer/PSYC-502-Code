@@ -1,6 +1,8 @@
 library(psych)
 library(dplyr)
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+if (!require("pacman")) install.packages("pacman"); library(pacman)
+p_load(stats, dplyr, psych, rstatix)
 
 #Nums: vector containing observed values
 geom.mean <- function(nums){
