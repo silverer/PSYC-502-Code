@@ -9,9 +9,23 @@ df['id'] <- factor(1:nrow(df))
 linear.test <- test.trend(df, c("T1","T2","T3"),
                           return.contr.means = TRUE)
 linear.test
-
+df$L <- linear.test$L
 df$G <- as.factor(df$G)
+
+#T-test and ANOVA give same result
 t.test(df$L1~df$G, var.equal=TRUE)
+res <- aov(df$L~df$G)
+summary(res)
+# df['L.t1'] <- -1 * df$T1
+# df['L.t3'] <- df$T3
+# df['L.t2'] <- 0 * df$T2
+# df_long <- df %>%
+#   gather(key = "time", value = "score", T1, T2, T3) %>% 
+#   mutate(time = as.factor(time),
+#          Subject = as.factor(id))
+# 
+# res.aov <- aov(score ~ (G) + Error(Subject/time), data = df_long)
+# print(summary(res.aov))
 
 #### OLD ####
 #All these lines are now performed by `test_trend` function in helpful_formulas.R! 

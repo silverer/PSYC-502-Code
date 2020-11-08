@@ -383,7 +383,8 @@ standard_error <- function(x) sd(x) / sqrt(length(x))
 #cols is a vector of timepoint columns in string format (e.g., 'Time1','Time2', etc.)
 #contrast.type
 test.trend <- function(df, cols, contrast.type = 'linear',
-                       id.col = 'id', return.contr.means = FALSE){
+                       id.col = 'id', return.contr.means = FALSE,
+                       return.L = TRUE){
   temp = df %>% 
     dplyr::select((all_of(cols)))
   num.points = ncol(temp)
@@ -429,13 +430,13 @@ test.trend <- function(df, cols, contrast.type = 'linear',
   t.stat = L/sem
   p.val = 2*pt(abs(t.stat), dof, lower.tail = FALSE)
   
-  stat.list[['L']] = L
+  stat.list[['L.mean']] = L
   stat.list[['t.stat']] = t.stat
   stat.list[['dof']] = dof
   stat.list[['p.val']] = p.val
   stat.list[['seL']] = sem
   stat.list[['contr.weights']] = w
-  
+  stat.list[['L']] <- df$L
   stat.list
 }
 
