@@ -7,7 +7,7 @@ p_load(stats, dplyr, psych, rstatix)
 #Nums: vector containing observed values
 geom.mean <- function(nums){
   product = prod(nums)
-  return(product^(1/3))
+  return(product^(1/length(nums)))
 }
 
 #Nums: vector containing observed values
@@ -240,7 +240,7 @@ stderr.mean <- function(sd, n){
 }
 
 tval.mean.diff <- function(g1, g2){
-  mdiff = g1-g2
+  mdiff = mean(g1)-mean(g2)
   mse = (var(g1)+var(g2))/2
   #Get the standard error of the mean difference
   seM = sqrt((2*mse)/length(g1))
